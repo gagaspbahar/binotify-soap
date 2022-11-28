@@ -9,5 +9,8 @@ import jakarta.jws.soap.SOAPBinding.Style;
 @SOAPBinding(style = Style.DOCUMENT)
 public interface SubscriptionService {
   @WebMethod
-  public int updateSubscription(int user, int artist, String status);
+  public String newSubscription(int user, int artist);
+
+  @WebMethod
+  public String updateSubscription(int user, int artist, String status);
 }
