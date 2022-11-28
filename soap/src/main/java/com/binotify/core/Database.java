@@ -7,7 +7,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 
 public class Database {
-  private Connection connection;
+  protected Connection connection;
   private Dotenv dotenv = Dotenv.load();
   private String DB_URL = dotenv.get("DB_URL");
   private String DB_USERNAME = dotenv.get("DB_USERNAME");

@@ -1,4 +1,4 @@
-package com.binotify.enums;
+package com.binotify.types;
 
 public enum StatusEnum {
     REJECTED("REJECTED"),

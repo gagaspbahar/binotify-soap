@@ -73,6 +73,12 @@
       <artifactId>dotenv-java</artifactId>
       <version>2.3.1</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.0.0</version>
+    </dependency>
   </dependencies>
 
   <build>
