@@ -8,6 +8,6 @@ public class App
 {
     public static void main( String[] args )
     {
-        Endpoint.publish("http://localhost:8888/ws/subscription", new SubscriptionServiceImpl());
+        Endpoint.publish("http://0.0.0.0:8888/ws/subscription", new SubscriptionServiceImpl());
     }
 }

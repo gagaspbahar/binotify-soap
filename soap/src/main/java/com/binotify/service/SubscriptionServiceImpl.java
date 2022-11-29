@@ -52,12 +52,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   public void callbackToPhp(int subscriber, int creator, String status) {
     try {
       URL url = new URL("http://localhost:8000/api/subscription/sync.php");
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection(); 
-      connection.setDoOutput(true); 
-      connection.setInstanceFollowRedirects(false); 
-      connection.setRequestMethod("POST"); 
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setDoOutput(true);
+      connection.setInstanceFollowRedirects(false);
+      connection.setRequestMethod("POST");
       OutputStream os = connection.getOutputStream();
-      String jsonData = "{\"subscriber_id\": " + subscriber + ", \"creator_id\": " + creator + ", \"status\": \"" + status + "\"}";
+      String jsonData = "{\"subscriber_id\": " + subscriber + ", \"creator_id\": " + creator + ", \"status\": \""
+          + status + "\"}";
       os.write(jsonData.getBytes("utf-8"));
       connection.getResponseCode();
       connection.disconnect();
@@ -153,8 +154,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
   }
 
-  public String getAllSubscriptionRequest(int page){
-    if(!validateApiKey()) {
+  public String getAllSubscriptionRequest(int page) {
+    if (!validateApiKey()) {
       return "Invalid API Key";
     }
     try {
@@ -164,10 +165,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       String sql = "SELECT * FROM subscription WHERE status = 'PENDING' LIMIT 10 OFFSET " + (page - 1) * 10;
       ResultSet result = statement.executeQuery(sql);
       String message = "{\"data\": [";
-      while(result.next()) {
-        message += "{\"subscriber_id\": " + result.getInt("subscriber_id") + " \"creator_id\": " + result.getInt("creator_id") + " \"status\": " + result.getString("status") + "},"; }
+      while (result.next()) {
+        message += "{\"subscriber_id\": " + result.getInt("subscriber_id") + " \"creator_id\": "
+            + result.getInt("creator_id") + " \"status\": " + result.getString("status") + "},";
+      }
       message = message.substring(0, message.length() - 1);
-      message += "]}";;
+      message += "]}";
+      ;
       log("Successfully get all subscription request");
       return message;
     } catch (Exception e) {
