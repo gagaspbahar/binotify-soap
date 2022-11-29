@@ -154,6 +154,27 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   }
 
   public String getAllSubscriptionRequest(int page){
-    return "";
+    if(!validateApiKey()) {
+      return "Invalid API Key";
+    }
+    try {
+      Database db = new Database();
+      Connection conn = db.getConnection();
+      Statement statement = conn.createStatement();
+      String sql = "SELECT * FROM subscription WHERE status = 'PENDING' LIMIT 10 OFFSET " + (page - 1) * 10;
+      ResultSet result = statement.executeQuery(sql);
+      String message = "{\"data\": [";
+      while(result.next()) {
+        message += "{\"subscriber_id\": " + result.getInt("subscriber_id") + " \"creator_id\": " + result.getInt("creator_id") + " \"status\": " + result.getString("status") + "},"; }
+      message = message.substring(0, message.length() - 1);
+      message += "]}";;
+      log("Successfully get all subscription request");
+      return message;
+    } catch (Exception e) {
+      e.printStackTrace();
+      String message = "Error getting all subscription request";
+      log(message);
+      return message;
+    }
   }
 }
