@@ -4,16 +4,25 @@ import jakarta.jws.WebMethod;
 import jakarta.jws.WebParam;
 import jakarta.jws.WebService;
 import jakarta.jws.soap.SOAPBinding;
+import jakarta.jws.soap.SOAPBinding.ParameterStyle;
 import jakarta.jws.soap.SOAPBinding.Style;
 
 @WebService
-@SOAPBinding(style = Style.DOCUMENT)
+@SOAPBinding(style = Style.DOCUMENT, parameterStyle = ParameterStyle.WRAPPED)
 public interface SubscriptionService {
   @WebMethod
-  public String newSubscription(@WebParam(name = "user", targetNamespace = "http://service.binotify.com/") int user,
-  @WebParam(name = "artist", targetNamespace = "http://service.binotify.com/") int artist);
+  public String newSubscription(
+      @WebParam(name = "subscriber", targetNamespace = "http://service.binotify.com/") int subscriber,
+      @WebParam(name = "creator", targetNamespace = "http://service.binotify.com/") int creator);
 
   @WebMethod
-  public String updateSubscription(@WebParam(name = "user", targetNamespace = "http://service.binotify.com/") int user,
-  @WebParam(name = "artist", targetNamespace = "http://service.binotify.com/") int artist, @WebParam(name = "status", targetNamespace = "http://service.binotify.com/") String status);
+  public String checkSubscription(
+      @WebParam(name = "subscriber", targetNamespace = "http://service.binotify.com/") int subscriber,
+      @WebParam(name = "creator", targetNamespace = "http://service.binotify.com/") int creator);
+
+  @WebMethod
+  public String updateSubscription(
+      @WebParam(name = "subscriber", targetNamespace = "http://service.binotify.com/") int subscriber,
+      @WebParam(name = "creator", targetNamespace = "http://service.binotify.com/") int creator,
+      @WebParam(name = "status", targetNamespace = "http://service.binotify.com/") String status);
 }
