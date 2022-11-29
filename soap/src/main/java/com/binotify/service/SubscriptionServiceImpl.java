@@ -1,11 +1,16 @@
 package com.binotify.service;
 
+// Ignore access restriction errors
+
 import jakarta.annotation.Resource;
 import jakarta.jws.WebService;
 import jakarta.xml.ws.WebServiceContext;
 import jakarta.xml.ws.handler.MessageContext;
 import com.sun.net.httpserver.HttpExchange;
 
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -15,17 +20,18 @@ import com.binotify.model.LogModel;
 
 @WebService(endpointInterface = "com.binotify.service.SubscriptionService")
 public class SubscriptionServiceImpl implements SubscriptionService {
-  @Resource 
+  @Resource
   public WebServiceContext wsContext;
 
   public Boolean validateApiKey() {
-    String[] API_KEYS = {"PremiumApp", "Postman", "RestClient", "RegularApp"};
+    String[] API_KEYS = { "PremiumApp", "Postman", "RestClient", "RegularApp" };
     MessageContext mc = wsContext.getMessageContext();
     HttpExchange exchange = (HttpExchange) mc.get("com.sun.xml.ws.http.exchange");
     String apiKey = exchange.getRequestHeaders().getFirst("X-API-KEY");
     if (apiKey == null) {
       return false;
-    } else if (apiKey.equals(API_KEYS[0]) || apiKey.equals(API_KEYS[1]) || apiKey.equals(API_KEYS[2]) || apiKey.equals(API_KEYS[3])) {
+    } else if (apiKey.equals(API_KEYS[0]) || apiKey.equals(API_KEYS[1]) || apiKey.equals(API_KEYS[2])
+        || apiKey.equals(API_KEYS[3])) {
       return true;
     } else {
       return false;
@@ -42,10 +48,29 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     String desc = apiKey + ": " + description;
     logModel.InsertLog(desc, endpoint, ip);
   }
-  
+
+  public void callbackToPhp(int subscriber, int creator, String status) {
+    try {
+      URL url = new URL("http://localhost:8000/api/subscription/sync.php");
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection(); 
+      connection.setDoOutput(true); 
+      connection.setInstanceFollowRedirects(false); 
+      connection.setRequestMethod("POST"); 
+      OutputStream os = connection.getOutputStream();
+      String jsonData = "{\"subscriber_id\": " + subscriber + ", \"creator_id\": " + creator + ", \"status\": \"" + status + "\"}";
+      os.write(jsonData.getBytes("utf-8"));
+      connection.getResponseCode();
+      connection.disconnect();
+    } catch (Exception err) {
+      System.out.println(err);
+      log("Failed to callback to php");
+      return;
+    }
+  }
+
   @Override
   public String newSubscription(int subscriber, int creator) {
-    if (!validateApiKey()){
+    if (!validateApiKey()) {
       return "Invalid API Key";
     }
     try {
@@ -53,16 +78,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       Connection connection = db.getConnection();
       Statement statement = connection.createStatement();
       String query = "SELECT * FROM subscription WHERE subscriber_id = " + subscriber + " AND creator_id = " + creator;
-      System.out.println(query);
       ResultSet result = statement.executeQuery(query);
       if (result.next()) {
         log("subscriber already subscribed to creator");
+        callbackToPhp(subscriber, creator, "PENDING");
         return "subscriber already subscribed to creator";
       }
-      String query2 = "INSERT INTO subscription (subscriber_id, creator_id) VALUES (" + subscriber + ", " + creator + ")";
+      String query2 = "INSERT INTO subscription (subscriber_id, creator_id) VALUES (" + subscriber + ", " + creator
+          + ")";
       statement.executeUpdate(query2);
-      String message = "subscriber " + subscriber + " subscribed to creator " + creator + " successfully with status Pending";
+      String message = "subscriber " + subscriber + " subscribed to creator " + creator
+          + " successfully with status Pending";
       log(message);
+      callbackToPhp(subscriber, creator, "PENDING");
       return message;
     } catch (Exception e) {
       e.printStackTrace();
@@ -73,7 +101,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
   @Override
   public String updateSubscription(int subscriber, int creator, String status) {
-    if (!validateApiKey()){
+    if (!validateApiKey()) {
       return "Invalid API Key";
     }
     try {
@@ -86,28 +114,31 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       statement.executeUpdate(sql);
       String message = "Successfully updated status of subscription to " + status;
       log(message);
+      callbackToPhp(subscriber, creator, status);
       return message;
     } catch (Exception e) {
       e.printStackTrace();
       String message = "Error updating subscription of " + subscriber + " to " + creator;
-      log(message); 
+      log(message);
       return message;
     }
   }
 
   public String checkSubscription(int subscriber, int creator) {
-    if (!validateApiKey()){
+    if (!validateApiKey()) {
       return "Invalid API Key";
     }
     try {
       Database db = new Database();
       Connection conn = db.getConnection();
       Statement statement = conn.createStatement();
-      String sql = "SELECT status FROM subscription WHERE subscriber_id = " + subscriber + " AND creator_id = " + creator;
+      String sql = "SELECT status FROM subscription WHERE subscriber_id = " + subscriber + " AND creator_id = "
+          + creator;
       ResultSet result = statement.executeQuery(sql);
       if (result.next()) {
         String status = result.getString("status");
-        log("Successfully checked subscription for subscriber " + subscriber + " to creator " + creator + " with status " + status);
+        log("Successfully checked subscription for subscriber " + subscriber + " to creator " + creator
+            + " with status " + status);
         return status;
       } else {
         String message = "subscriber " + subscriber + " is not subscribed to creator " + creator;
@@ -117,8 +148,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     } catch (Exception e) {
       e.printStackTrace();
       String message = "Error getting subscription of " + subscriber + " to " + creator;
-      log(message); 
+      log(message);
       return message;
     }
+  }
+
+  public String getAllSubscriptionRequest(int page){
+    return "";
   }
 }

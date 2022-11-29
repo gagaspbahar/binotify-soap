@@ -25,4 +25,9 @@ public interface SubscriptionService {
       @WebParam(name = "subscriber", targetNamespace = "http://service.binotify.com/") int subscriber,
       @WebParam(name = "creator", targetNamespace = "http://service.binotify.com/") int creator,
       @WebParam(name = "status", targetNamespace = "http://service.binotify.com/") String status);
+
+  @WebMethod
+  public String getAllSubscriptionRequest(
+      @WebParam(name = "page", targetNamespace = "http://service.binotify.com/") int page);
+
 }
