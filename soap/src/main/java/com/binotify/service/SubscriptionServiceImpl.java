@@ -74,9 +74,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     if (!validateApiKey()) {
       return "Invalid API Key";
     }
+    Database db = new Database();
+    Connection connection = db.getConnection();
     try {
-      Database db = new Database();
-      Connection connection = db.getConnection();
       Statement statement = connection.createStatement();
       String query = "SELECT * FROM subscription WHERE subscriber_id = " + subscriber + " AND creator_id = " + creator;
       ResultSet result = statement.executeQuery(query);
@@ -97,6 +97,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       e.printStackTrace();
       log("Error creating subscription");
       return "Error creating subscription";
+    } finally {
+      try {
+        connection.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+        log("Error closing connection");
+      }
     }
   }
 
@@ -105,9 +112,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     if (!validateApiKey()) {
       return "Invalid API Key";
     }
+    Database db = new Database();
+    Connection conn = db.getConnection();
     try {
-      Database db = new Database();
-      Connection conn = db.getConnection();
       Statement statement = conn.createStatement();
       String sql = "UPDATE subscription SET status = '" + status + "' WHERE subscriber_id = " + subscriber
           + " AND creator_id = " + creator;
@@ -122,6 +129,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       String message = "Error updating subscription of " + subscriber + " to " + creator;
       log(message);
       return message;
+    } finally {
+      try {
+        conn.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+        log("Error closing connection");
+      }
     }
   }
 
@@ -129,9 +143,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     if (!validateApiKey()) {
       return "Invalid API Key";
     }
+    Database db = new Database();
+    Connection conn = db.getConnection();
     try {
-      Database db = new Database();
-      Connection conn = db.getConnection();
       Statement statement = conn.createStatement();
       String sql = "SELECT status FROM subscription WHERE subscriber_id = " + subscriber + " AND creator_id = "
           + creator;
@@ -151,6 +165,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       String message = "Error getting subscription of " + subscriber + " to " + creator;
       log(message);
       return message;
+    } finally {
+      try {
+        conn.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+        log("Error closing connection");
+      }
     }
   }
 
@@ -158,20 +179,24 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     if (!validateApiKey()) {
       return "Invalid API Key";
     }
+    Database db = new Database();
+    Connection conn = db.getConnection();
     try {
-      Database db = new Database();
-      Connection conn = db.getConnection();
       Statement statement = conn.createStatement();
       String sql = "SELECT * FROM subscription WHERE status = 'PENDING' LIMIT 10 OFFSET " + (page - 1) * 10;
       ResultSet result = statement.executeQuery(sql);
+      Boolean hasResult = false;
       String message = "{\"data\": [";
       while (result.next()) {
-        message += "{\"subscriber_id\": " + result.getInt("subscriber_id") + " \"creator_id\": "
-            + result.getInt("creator_id") + " \"status\": " + result.getString("status") + "},";
+        message += "{\"subscriber_id\": " + result.getInt("subscriber_id") + ", \"creator_id\": "
+            + result.getInt("creator_id") + ", \"status\": \"" + result.getString("status") + "\"},";
+        hasResult = true;
       }
       message = message.substring(0, message.length() - 1);
       message += "]}";
-      ;
+      if (!hasResult) {
+        message = "{\"data\": []}";
+      }
       log("Successfully get all subscription request");
       return message;
     } catch (Exception e) {
@@ -179,6 +204,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       String message = "Error getting all subscription request";
       log(message);
       return message;
+    } finally {
+      try {
+        conn.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+        log("Error closing connection");
+      }
     }
   }
 }
