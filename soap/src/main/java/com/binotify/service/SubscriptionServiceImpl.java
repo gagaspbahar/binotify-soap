@@ -8,6 +8,8 @@ import jakarta.xml.ws.WebServiceContext;
 import jakarta.xml.ws.handler.MessageContext;
 import com.sun.net.httpserver.HttpExchange;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -51,7 +53,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
   public void callbackToPhp(int subscriber, int creator, String status) {
     try {
-      URL url = new URL("http://localhost:8000/api/subscription/sync.php");
+      Dotenv dotenv = Dotenv.load();
+      String phpUrl = dotenv.get("PHP_URL");
+      if (phpUrl == null) {
+        phpUrl = "http://localhost:8000/api/subscription/sync.php";
+      }
+      URL url = new URL(phpUrl);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setDoOutput(true);
       connection.setInstanceFollowRedirects(false);
