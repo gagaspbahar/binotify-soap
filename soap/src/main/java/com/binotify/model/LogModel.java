@@ -3,7 +3,6 @@ package com.binotify.model;
 import java.sql.Statement;
 
 import com.binotify.core.Database;
-import com.binotify.types.LogType;
 
 public class LogModel extends Database {
   public LogModel() {
