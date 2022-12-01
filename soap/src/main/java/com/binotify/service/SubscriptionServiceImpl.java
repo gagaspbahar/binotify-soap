@@ -220,4 +220,81 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       }
     }
   }
+
+  public String getAllSubscriptionRequestBySubscriber(int subscriber) {
+    if (!validateApiKey()) {
+      return "Invalid API Key";
+    }
+    Database db = new Database();
+    Connection conn = db.getConnection();
+    try {
+      Statement statement = conn.createStatement();
+      String sql = "SELECT * FROM subscription WHERE subscriber_id = " + subscriber;
+      ResultSet result = statement.executeQuery(sql);
+      Boolean hasResult = false;
+      String message = "{\"data\": [";
+      while (result.next()) {
+        message += "{\"subscriber_id\": " + result.getInt("subscriber_id") + ", \"creator_id\": "
+            + result.getInt("creator_id") + ", \"status\": \"" + result.getString("status") + "\"},";
+        hasResult = true;
+      }
+      message = message.substring(0, message.length() - 1);
+      message += "]}";
+      if (!hasResult) {
+        message = "{\"data\": []}";
+      }
+      log("Successfully get all subscription request by subscriber " + subscriber);
+      return message;
+    } catch (Exception e) {
+      String message = "Error getting all subscription request by subscriber " + subscriber;
+      log(message);
+      return message;
+    } finally {
+      try {
+        conn.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+        log("Error closing connection");
+      }
+    }
+  }
+
+  public String getAllSubscribedArtistsBySubscriber(int subscriber) {
+    if (!validateApiKey()) {
+      return "Invalid API Key";
+    }
+    Database db = new Database();
+    Connection conn = db.getConnection();
+    try {
+      Statement statement = conn.createStatement();
+      String sql = "SELECT * FROM subscription WHERE subscriber_id = " + subscriber + " AND status = 'ACCEPTED'";
+      ResultSet result = statement.executeQuery(sql);
+      Boolean hasResult = false;
+      String message = "{\"data\": [";
+      while (result.next()) {
+        message += "{\"subscriber_id\": " + result.getInt("subscriber_id") + ", \"creator_id\": "
+            + result.getInt("creator_id") + ", \"status\": \"" + result.getString("status") + "\"},";
+        hasResult = true;
+      }
+      message = message.substring(0, message.length() - 1);
+      message += "]}";
+      if (!hasResult) {
+        message = "{\"data\": []}";
+      }
+      log("Successfully get all subscription request by subscriber " + subscriber);
+      return message;
+
+    } catch (Exception e) {
+      String message = "Error getting all subscribed artists by subscriber " + subscriber;
+      log(message);
+      return message;
+    } finally {
+      try {
+        conn.close();
+      } catch (Exception e) {
+        e.printStackTrace();
+        log("Error closing connection");
+      }
+    }
+  }
 }
