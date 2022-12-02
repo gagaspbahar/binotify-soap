@@ -51,4 +51,10 @@ Alternatif 2:
 
 ### Pembagian Tugas
 
+1. Initial Project Setup: 13520016
+2. Security: Logging and Api Key: 13520016
+3. New Subscription: 13520016, 13520073
+4. Update Subscription: 13520016, 13520076
+5. Sync to PHP: 13520016
+
 #### Proudly Presented by Binosed, 2022
